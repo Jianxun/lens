@@ -5,7 +5,7 @@ from typing import Generator, List, Optional
 from uuid import UUID
 
 import psycopg
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, Field
 
 from backend.models import sessions as session_store
@@ -143,14 +143,19 @@ def patch_session(
     return _to_detail(updated)
 
 
-@router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 def delete_session(
     session_id: UUID,
     conn: psycopg.Connection = Depends(db_conn),
-) -> None:
+) -> Response:
     try:
         session_store.soft_archive_session(conn, session_id)
         conn.commit()
     except session_store.SessionNotFound as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
