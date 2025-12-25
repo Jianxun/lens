@@ -67,7 +67,7 @@
   - PR: https://github.com/Jianxun/lens/pull/6
 
 - T-009 — Frontend MVP  
-  - Status: In Progress  
+  - Status: Done (2025-12-25)  
   - Owner: Executor  
   - DoD:  
     - Implement chat UI (markdown assistant, user bubbles), session list panel, streaming `/chat` consumption, collapsible histogram display with cited turn_ids.  
@@ -75,7 +75,8 @@
   - Verify:  
     - UI shows sessions, loads history, streams replies; histogram panel renders when provided.  
   - Files allowed: `frontend/` (Vite/React or similar), minimal config, no heavy theming.  
-  - Links: `agents/scratchpads/T-009.md`
+  - Links: `agents/scratchpads/T-009.md`  
+  - PR: https://github.com/Jianxun/lens/pull/7
 
 - T-010 — Embedding creation pipeline  
   - Status: Done (2025-12-25)  
