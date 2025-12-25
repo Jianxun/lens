@@ -9,7 +9,8 @@
 - `backend/`:
   - `ingest/`: JSONL → Postgres pipeline (pipeline, helpers).
   - `embeddings/`: embedding jobs for turn-level vectors.
-  - `api/`: FastAPI endpoints (retrieval, chat, sessions).
+  - `api/`: FastAPI endpoints (`retrieval.py` for `/retrieval/peek` and `/retrieval/turn/{id}`).
+  - `main.py`: FastAPI app wiring, DSN/env setup, embedding client bootstrap.
   - `services/`: agent orchestration, retrieval wiring (planned).
   - `models/`: DB models / queries (planned).
 - `scripts/`: helper CLIs (`split_conversations_jsonl.py`, ingest helpers, embedding runners).

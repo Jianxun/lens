@@ -29,7 +29,7 @@
   - Links: `agents/scratchpads/T-005.md`
 
 - T-006 — Retrieval API  
-  - Status: Ready  
+  - Status: Done (2025-12-25)  
   - Owner: Executor  
   - DoD:  
     - Implement FastAPI endpoints `/retrieval/peek` (top_k default 100, UTC bins, top_n_snippets) and `/retrieval/turn/{id}`.  
@@ -39,6 +39,7 @@
     - `GET /retrieval/peek` returns histogram + snippets on seeded data.  
     - `GET /retrieval/turn/{id}` returns full turn content for a known id.  
   - Files allowed: `backend/api/retrieval.py`, `backend/main.py` (routing), `backend/models/` as needed.
+  - Links: `agents/scratchpads/T-006.md`
 
 - T-007 — Chat agent orchestration  
   - Status: Ready  

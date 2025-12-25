@@ -60,6 +60,20 @@ Expected tables after `migrations/0001_init.sql`: `conversations`, `messages`, `
 - Use `--force` to recompute even when `content_hash` matches an existing row.
 - Output includes `embedded`, `skipped_existing_hash`, and `batches`. Upserts into `message_embeddings` with unique `(user_message_id, provider, model)` using SHA256 `content_hash` to skip unchanged turns.
 
+## Retrieval API
+- Install deps: `python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt`
+- Export `SUPER_MIND_API_KEY` (same student portal key as embeddings).
+- Run API locally:
+  ```bash
+  POSTGRES_PORT=${POSTGRES_PORT:-5433} \
+  SUPER_MIND_API_KEY=... \
+  .venv/bin/uvicorn backend.main:app --reload
+  ```
+- Example calls:
+  - `curl "http://localhost:8000/retrieval/peek?query=hello&bin_days=1&top_k=100&top_n_snippets=10"`
+  - `curl "http://localhost:8000/retrieval/turn/{turn_id}"`
+- `/retrieval/peek` uses fixed model `text-embedding-3-large`, computes histogram buckets in whole days over the top_k matches, and returns top_n_snippets snippets.
+
 ## Notes & constraints
 - Extensions enabled: `pgcrypto`, `pg_trgm`, `vector`.
 - Roles enforced on `messages.role` (`user` | `assistant`); `idx_in_conv` unique per conversation.

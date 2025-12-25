@@ -21,3 +21,6 @@ follow before doing any work. Keep it concise, append-only, and user-driven:
    - The database Docker container is always up when running tasks.
    - Never start, stop, restart, or check the status of Docker containers unless
      the task explicitly requires it.
+
+3. **2025-12-25 — Load secrets from `.env` before running embedding-dependent commands.**
+   - Source the repo `.env` (e.g., `set -a && source .env && set +a`) so `SUPER_MIND_API_KEY` is available for student portal embeddings and API verification.
