@@ -11,6 +11,7 @@ Date: 2025-12-25
 - Expose a streaming chat API: `POST /chat` (FastAPI).
   - Input: conversation_id (optional), user message(s).
   - Output: streamed assistant response (SSE or chunked).
+- Orchestrator LLM: `gpt-5` (student portal `/v1/chat/completions`, streaming) drives tool calls; logic is not hardwired.
 - Agent tool palette (server-internal, available to the model):
   - `retrieval/peek(query, top_k=100, time_range, bin, conversation_id, top_n_snippets=10)` → histogram over all hits, snippets for top few.
   - `retrieval/turn(turn_id)` → full turn (user + assistant/summary).
@@ -23,7 +24,7 @@ Date: 2025-12-25
 - LLM backend:
   - Base URL: `SUPER_MIND_BASE_URL` (`https://space.ai-builders.com/backend`).
   - Key: `SUPER_MIND_API_KEY` from `.env`.
-  - Endpoint: `/v1/chat/completions` with `stream=true`.
+  - Endpoint: `/v1/chat/completions` with `stream=true`, model `gpt-5`.
 - Guardrails:
   - Cap total `turn` hydrations per request; cap max tokens and context length.
   - Do not expose provider/model knobs to clients.

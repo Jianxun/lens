@@ -7,7 +7,7 @@ from typing import Optional
 
 from fastapi import FastAPI
 
-from backend.api import retrieval
+from backend.api import chat, retrieval
 
 EMBEDDING_BASE_URL = "https://space.ai-builders.com/backend/v1"
 EMBEDDING_API_KEY_ENV = "SUPER_MIND_API_KEY"
@@ -35,7 +35,7 @@ def build_embedding_client() -> Optional[httpx.Client]:
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Lens Retrieval API")
+    app = FastAPI(title="Lens API")
 
     app.state.dsn = dsn_from_env()
     app.state.embedding_client = build_embedding_client()
@@ -47,6 +47,7 @@ def create_app() -> FastAPI:
             client.close()
 
     app.include_router(retrieval.router)
+    app.include_router(chat.router)
     return app
 
 
