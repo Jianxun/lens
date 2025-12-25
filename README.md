@@ -33,6 +33,21 @@ psql "postgresql://${POSTGRES_USER:-lens}:${POSTGRES_PASSWORD:-lens}@localhost:$
 
 Expected tables after `migrations/0001_init.sql`: `conversations`, `messages`, `message_embeddings`, `sessions`, `session_messages`, `ingest_runs`.
 
+## Ingestion (JSONL → Postgres)
+- Install deps: `python3 -m venv .venv && .venv/bin/pip install -r backend/ingest/requirements.txt`
+- Start Postgres (see above), then run ingest (defaults to `POSTGRES_*` env vars):
+  ```bash
+  POSTGRES_PORT=${POSTGRES_PORT:-5433} \
+  .venv/bin/python scripts/ingest_jsonl.py data/chatgpt_dump/2025-12-23/conversations.jsonl
+  ```
+- Verify run + stats:
+  ```bash
+  psql "postgresql://${POSTGRES_USER:-lens}:${POSTGRES_PASSWORD:-lens}@localhost:${POSTGRES_PORT:-5433}/${POSTGRES_DB:-lens}" \
+    -c "select status, stats from ingest_runs order by started_at desc limit 1"
+  psql "postgresql://${POSTGRES_USER:-lens}:${POSTGRES_PASSWORD:-lens}@localhost:${POSTGRES_PORT:-5433}/${POSTGRES_DB:-lens}" \
+    -c "select id, conversation_id, idx_in_conv, role, create_time from messages order by create_time asc limit 5"
+  ```
+
 ## Notes & constraints
 - Extensions enabled: `pgcrypto`, `pg_trgm`, `vector`.
 - Roles enforced on `messages.role` (`user` | `assistant`); `idx_in_conv` unique per conversation.
