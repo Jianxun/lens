@@ -14,6 +14,7 @@ import psycopg
 from fastapi import HTTPException
 
 from backend.api import retrieval
+from backend.models import sessions as session_store
 
 logger = logging.getLogger(__name__)
 
@@ -518,7 +519,7 @@ class AgentService:
         self._embedding_client = embedding_client
         self._chat_client = chat_client
 
-    def run(self, intent: str) -> tuple[str, Dict[str, Any]]:
+    def run(self, intent: str, *, session_id: Optional[UUID] = None) -> tuple[str, Dict[str, Any]]:
         tools = RetrievalTools(self._dsn, self._embedding_client)
 
         created_client = False
@@ -534,14 +535,52 @@ class AgentService:
                 raise HTTPException(status_code=502, detail="Orchestrator did not produce a response")
 
             histogram = result.histogram or {"bin_days": DEFAULT_BIN_DAYS, "buckets": [], "total": 0}
+            persisted = self._persist_turn(session_id=session_id, user_text=intent, assistant_text=result.final_answer)
             metadata = {
                 "cited_turn_ids": result.cited_turn_ids,
                 "histogram": histogram,
+                "session_id": str(persisted["session_id"]),
+                "conversation_id": str(persisted["conversation_id"]),
+                "user_message_id": str(persisted["user_message_id"]),
+                "assistant_message_id": str(persisted["assistant_message_id"]),
             }
             return result.final_answer, metadata
         finally:
             if created_client:
                 chat_client.close()
+
+    def _persist_turn(
+        self,
+        *,
+        session_id: Optional[UUID],
+        user_text: str,
+        assistant_text: str,
+    ) -> Dict[str, Any]:
+        user_clean = (user_text or "").strip()
+        if not user_clean:
+            raise HTTPException(status_code=400, detail="Cannot persist empty user message")
+        assistant_clean = (assistant_text or "").strip()
+        if not assistant_clean:
+            raise HTTPException(status_code=502, detail="Assistant response was empty")
+
+        with psycopg.connect(self._dsn) as conn:
+            try:
+                target_session_id = session_id
+                if target_session_id is None:
+                    target_session_id, _ = session_store.create_session(conn, title=None)
+                result = session_store.append_turn(
+                    conn,
+                    target_session_id,
+                    user_content=user_clean,
+                    assistant_content=assistant_clean,
+                )
+                conn.commit()
+            except session_store.SessionNotFound as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        return result
 
 
 def stream_answer(text: str, metadata: Dict[str, Any]):

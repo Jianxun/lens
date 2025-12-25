@@ -55,7 +55,7 @@
   - Links: `agents/scratchpads/T-007.md`
 
 - T-008 — Sessions API & persistence  
-  - Status: Ready  
+  - Status: Done (2025-12-25)  
   - Owner: Executor  
   - DoD:  
     - Implement `/sessions` list/get/create/patch/delete (soft archive) and link messages to sessions with linear ordering.  
@@ -63,6 +63,8 @@
   - Verify:  
     - CRUD works in manual tests; session_messages reflect message order; archived sessions hidden from default list.  
   - Files allowed: `backend/api/sessions.py`, `backend/models/`, `backend/main.py`.
+  - Links: `agents/scratchpads/T-008.md`
+  - PR: https://github.com/Jianxun/lens/pull/6
 
 - T-009 — Frontend MVP  
   - Status: Ready  
