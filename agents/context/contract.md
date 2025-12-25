@@ -32,7 +32,7 @@
 - 2025-12-25 (ADR-0002): Defined ingestion pipeline from ChatGPT JSON/JSONL to Postgres, keeping only user/assistant messages, stable ordering, and ingest run audit.
 - 2025-12-25 (ADR-0003): Defined turn-level embedding strategy anchored on user message IDs with assistant linkage, summary-first text selection, and UUID-keyed embeddings table.
 - 2025-12-25 (ADR-0004): Defined retrieval API under `/retrieval/` with `peek` (histogram + top matches) and `turn` hydration by embedding ID.
-- 2025-12-25 (ADR-0005): Defined agent orchestration and streaming `/chat` API; fixed embedding model; multi-pass peek/turn tool usage with temporal zooming and capped hydration.
+- 2025-12-25 (ADR-0005): Defined agent orchestration and streaming `/chat` API; orchestrator LLM `gpt-5`; fixed embedding model; multi-pass peek/turn tool usage with temporal zooming and capped hydration.
 - 2025-12-25 (ADR-0006): Defined sessions model/API (sessions list, history, soft archive/pin, linking messages to sessions).
 - 2025-12-25 (ADR-0007): Defined frontend UX (ChatGPT-like layout, markdown assistant bubbles, session list, streaming chat, full-history default).
 
