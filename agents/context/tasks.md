@@ -42,7 +42,7 @@
   - Links: `agents/scratchpads/T-006.md`
 
 - T-007 — Chat agent orchestration  
-  - Status: Ready  
+  - Status: Done (2025-12-25)  
   - Owner: Executor  
   - DoD:  
     - Implement streaming `/chat` endpoint using student portal `/v1/chat/completions`.  
@@ -51,7 +51,8 @@
   - Verify:  
     - Live call returns streamed tokens; response metadata includes cited turn_ids and histogram.  
     - Logs show tool calls and capped hydration.  
-  - Files allowed: `backend/api/chat.py`, `backend/main.py`, `backend/services/agent.py`.
+  - Files allowed: `backend/api/chat.py`, `backend/main.py`, `backend/services/agent.py`.  
+  - Links: `agents/scratchpads/T-007.md`
 
 - T-008 — Sessions API & persistence  
   - Status: Ready  
