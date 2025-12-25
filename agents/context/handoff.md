@@ -7,6 +7,7 @@
 - T-010 done: embedding pipeline added (`backend/embeddings/pipeline.py`, `backend/embeddings/requirements.txt`, `scripts/embed_messages.py`) using student portal embeddings (provider `supermind`, model `text-embedding-3-large`). Includes SHA256 content_hash skip, summary preference, truncation guard (32k), batching/retries, upsert into `message_embeddings`. README updated with embedding instructions.
 - T-006 done: retrieval router live (`backend/api/retrieval.py`) with `/retrieval/peek` + `/turn/{id}`; app wired via `backend/main.py`; `backend/requirements.txt` added. Requires `SUPER_MIND_API_KEY`.
 - T-007 done on branch `feature/T-007-chat-agent`: orchestrator rewired to LLM tool-calls with legacy system prompt; OpenAI base `https://api.openai.com/v1/` and model `gpt-5.1` for orchestration; `/chat` now has documented request body; added `scripts/orchestrator_smoke.py` non-stream smoke; metadata includes cited_turn_ids + histogram.
+- T-009 on branch `feature/T-009-frontend-mvp` (PR #7 open): scaffolded `frontend/` (Vite + React TS) with session list panel, streaming chat UI (markdown assistant/user bubbles), histogram + cited turn IDs panel driven by chat metadata; API helpers stream SSE and send full history; dev proxy `/api` → `http://localhost:8000`. Backend fix: `/sessions/{id}` delete now uses `Response` for 204 to avoid FastAPI assertion during app startup.
 
 ## Last verified
 - 2025-12-25 05:10 EST: `.venv/bin/python -m compileall backend` (pass). Manual model smoke: create session + append turn via `backend.models.sessions` (session_id `cd9e2457-1e05-4900-9765-6fbd74eac33d`, conversation_id `d5cc200c-7dca-4fbd-a719-99933282fe42`, message_count=2, idx [0,1]). `list_sessions` shows session_count=1, archived=False, pinned=False. Patched/pinned same session then soft-archived; archived session hidden from default list, visible with `include_archived=True`.
@@ -16,11 +17,15 @@
 - 2025-12-25: Student portal embedding smoke test (text-embedding-3-large) returned HTTP 200, embedding length 3072. Sample job `POSTGRES_PORT=5433 .venv/bin/python scripts/embed_messages.py --batch-size 8 --limit 20` (env from `.env`) → `{'embedded': 8, 'skipped_existing_hash': 12, 'batches': 1}`. Re-run on port 5432 with force + paging `POSTGRES_PORT=5432 .venv/bin/python scripts/embed_messages.py --batch-size 8 --limit 100 --force` → `message_embeddings` rows=100 for provider/model `supermind`/`text-embedding-3-large`.
 - 2025-12-25: `python -m compileall backend` (pass) covering new chat/service modules.
 - 2025-12-25: Non-stream orchestrator smoke (`python scripts/orchestrator_smoke.py "Summarize recent progress on the Lens project."` with .env loaded) → status ok; cited_turn_ids count 10; histogram buckets 5; model gpt-5.1 via OPENAI_BASE_URL=https://api.openai.com/v1/.
+- 2025-12-25: `cd frontend && npm run build` (pass).
+- 2025-12-25: `. .venv/bin/activate && python - <<'PY' from backend.main import create_app; create_app(); PY` (FastAPI app builds; 204 assertion resolved).
+- 2025-12-25: `cd frontend && npm run build` (pass post-backend fix).
 
 ## Next steps (1–3)
 - Keep `.env` sourced for embedding- and chat-dependent commands; `SUPER_MIND_API_KEY` and `OPENAI_API_KEY` required.
 - Optional: run uvicorn for streaming `/chat` smoke (`.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000`) and POST OpenAI-style payload; expect streamed tokens, metadata chunk (cited_turn_ids + histogram + session/message ids), and session persistence.
 - Retrieval endpoints remain available for troubleshooting; pgweb available on PGWEB_PORT (default 8081) via `docker compose up -d db pgweb`.
+- Frontend: `cd frontend && npm run dev` (proxy /api→:8000). Ensure backend running with `.env` loaded; UI should show sessions list, chat history, streaming replies, histogram toggle when metadata arrives. If 404 persists, confirm backend is up after 204 fix and proxy target matches `localhost:8000`. Await PR #7 review/merge.
 
 ## Risks / unknowns
 - No vector index for 3072-dim embeddings; retrieval perf will rely on seq scan unless model/dim change or alternative index is added.

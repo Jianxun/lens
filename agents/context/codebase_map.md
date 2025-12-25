@@ -14,7 +14,11 @@
   - `services/`: agent orchestration, retrieval wiring (planned).
   - `models/`: DB models / queries (planned).
 - `scripts/`: helper CLIs (`split_conversations_jsonl.py`, ingest helpers, embedding runners).
-- `frontend/`: chat UI (sessions panel, streaming chat, histogram panel) — to be implemented.
+- `frontend/`: Vite + React TS chat UI with session list, streaming chat, and histogram panel. Key files:
+  - `src/App.tsx`: main UI (sessions list, chat view, histogram toggle, composer).
+  - `src/api.ts`: API helpers for sessions and streaming `/chat`.
+  - `src/types.ts`: shared frontend types.
+  - `vite.config.ts`: dev proxy `/api` → FastAPI (default http://localhost:8000).
 - `data/chatgpt_dump/`: sample ChatGPT exports (JSON/JSONL) for ingestion tests.
 - `docker-compose.yml`: local Postgres + pgvector container definition.
 
