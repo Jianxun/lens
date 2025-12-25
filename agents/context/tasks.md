@@ -5,7 +5,7 @@
 
 ## Current Sprint
 - T-004 — Database schema & migrations  
-  - Status: In Progress  
+  - Status: Done (2025-12-25)  
   - Owner: Executor  
   - DoD:  
     - Create Postgres schema: conversations, messages, message_embeddings (UUID PK), sessions, session_messages, ingest_runs.  
@@ -71,6 +71,19 @@
   - Verify:  
     - UI shows sessions, loads history, streams replies; histogram panel renders when provided.  
   - Files allowed: `frontend/` (Vite/React or similar), minimal config, no heavy theming.
+
+- T-010 — Embedding creation pipeline  
+  - Status: Done (2025-12-25)  
+  - Owner: Executor  
+  - DoD:  
+    - Implement embedding job to generate turn-level embeddings (user anchor, assistant linked) using fixed `text-embedding-3-large`.  
+    - Respect truncation limits; store `content_used`, `used_turn_summary`, `content_hash`; upsert into `message_embeddings` with unique (user_message_id, provider, model).  
+    - CLI/runner to process new messages incrementally; skip already-hashed content.  
+  - Verify:  
+    - Run on sample data completes; embeddings table populated with expected rows and vectors; duplicates avoided via unique constraint.  
+    - Spot-check summary preference: when turn_summary exists, it is used.  
+  - Files allowed: `backend/embeddings/` (new), `scripts/` (helper CLI), `README.md` (embedding usage).  
+  - Links: `agents/scratchpads/T-010.md`
 
 ## Backlog
 - T-003 — Define initial application skeleton once scope is known  

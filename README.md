@@ -48,6 +48,18 @@ Expected tables after `migrations/0001_init.sql`: `conversations`, `messages`, `
     -c "select id, conversation_id, idx_in_conv, role, create_time from messages order by create_time asc limit 5"
   ```
 
+## Embeddings (student portal)
+- Install deps: `python3 -m venv .venv && .venv/bin/pip install -r backend/embeddings/requirements.txt`
+- Export `SUPER_MIND_API_KEY` (student portal token). Endpoint used: `POST https://space.ai-builders.com/backend/v1/embeddings` with model `text-embedding-3-large` (provider label `supermind`).
+- Run embedding job (defaults to `POSTGRES_*` env vars):
+  ```bash
+  SUPER_MIND_API_KEY=... \
+  POSTGRES_PORT=${POSTGRES_PORT:-5433} \
+  .venv/bin/python scripts/embed_messages.py --batch-size 16 --limit 100
+  ```
+- Use `--force` to recompute even when `content_hash` matches an existing row.
+- Output includes `embedded`, `skipped_existing_hash`, and `batches`. Upserts into `message_embeddings` with unique `(user_message_id, provider, model)` using SHA256 `content_hash` to skip unchanged turns.
+
 ## Notes & constraints
 - Extensions enabled: `pgcrypto`, `pg_trgm`, `vector`.
 - Roles enforced on `messages.role` (`user` | `assistant`); `idx_in_conv` unique per conversation.
