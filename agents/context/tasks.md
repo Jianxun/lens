@@ -64,6 +64,7 @@
     - CRUD works in manual tests; session_messages reflect message order; archived sessions hidden from default list.  
   - Files allowed: `backend/api/sessions.py`, `backend/models/`, `backend/main.py`.
   - Links: `agents/scratchpads/T-008.md`
+  - PR: https://github.com/Jianxun/lens/pull/6
 
 - T-009 — Frontend MVP  
   - Status: Ready  

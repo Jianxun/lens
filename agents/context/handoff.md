@@ -1,7 +1,7 @@
 # Handoff
 
 ## Current state
-- T-008 in progress on branch `feature/T-008-sessions-api`: added session helpers (`backend/models/sessions.py`), new `/sessions` router, wired into `backend/main.py`, chat now accepts `session_id` and persists finalized user/assistant turns into `messages` and `session_messages` (metadata returns session/message ids).
+- T-008 on branch `feature/T-008-sessions-api` (PR #6): added session helpers (`backend/models/sessions.py`), new `/sessions` router, wired into `backend/main.py`, chat now accepts `session_id` and persists finalized user/assistant turns into `messages` and `session_messages` (metadata returns session/message ids).
 - T-004 done: initial Postgres schema added (`migrations/0001_init.sql`), docker-compose for local Postgres + pgvector, README with setup/verify steps, pgweb UI, codebase_map updated. DB running on port 5432 (docker compose).
 - T-005 done: ingestion pipeline implemented (`backend/ingest/pipeline.py`, `backend/__init__.py`), CLI `scripts/ingest_jsonl.py` (adds repo root to PYTHONPATH), requirements at `backend/ingest/requirements.txt`, README ingestion section. Pipeline scrubs null bytes, deterministic DFS ordering, content/summary truncation (32k/4k), role filter user/assistant, skips empty content_text, raw + stats persisted. Codebase map updated.
 - T-010 done: embedding pipeline added (`backend/embeddings/pipeline.py`, `backend/embeddings/requirements.txt`, `scripts/embed_messages.py`) using student portal embeddings (provider `supermind`, model `text-embedding-3-large`). Includes SHA256 content_hash skip, summary preference, truncation guard (32k), batching/retries, upsert into `message_embeddings`. README updated with embedding instructions.
