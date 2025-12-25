@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request
@@ -43,6 +44,7 @@ class ChatRequest(BaseModel):
     model: Optional[str] = Field(None, description="Optional model override for downstream chat completion")
     max_tokens: Optional[int] = Field(None, description="Optional max completion tokens")
     max_completion_tokens: Optional[int] = Field(None, description="Alias for max_tokens")
+    session_id: Optional[UUID] = Field(None, description="Existing session to append; if absent a new session is created")
 
 
 @router.post("", response_class=StreamingResponse)
@@ -55,7 +57,7 @@ async def chat(payload: ChatRequest, request: Request) -> StreamingResponse:
     dsn, client = _get_state(request)
 
     service = AgentService(dsn, embedding_client=client)
-    final_answer, metadata = service.run(user_query)
+    final_answer, metadata = service.run(user_query, session_id=payload.session_id)
 
     stream = stream_answer(final_answer, metadata)
     return StreamingResponse(stream, media_type=STREAM_MEDIA_TYPE)

@@ -7,7 +7,7 @@ from typing import Optional
 
 from fastapi import FastAPI
 
-from backend.api import chat, retrieval
+from backend.api import chat, retrieval, sessions
 
 EMBEDDING_BASE_URL = "https://space.ai-builders.com/backend/v1"
 EMBEDDING_API_KEY_ENV = "SUPER_MIND_API_KEY"
@@ -47,6 +47,7 @@ def create_app() -> FastAPI:
             client.close()
 
     app.include_router(retrieval.router)
+    app.include_router(sessions.router)
     app.include_router(chat.router)
     return app
 

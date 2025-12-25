@@ -1,6 +1,7 @@
 # Handoff
 
 ## Current state
+- T-008 in progress on branch `feature/T-008-sessions-api`: added session helpers (`backend/models/sessions.py`), new `/sessions` router, wired into `backend/main.py`, chat now accepts `session_id` and persists finalized user/assistant turns into `messages` and `session_messages` (metadata returns session/message ids).
 - T-004 done: initial Postgres schema added (`migrations/0001_init.sql`), docker-compose for local Postgres + pgvector, README with setup/verify steps, pgweb UI, codebase_map updated. DB running on port 5432 (docker compose).
 - T-005 done: ingestion pipeline implemented (`backend/ingest/pipeline.py`, `backend/__init__.py`), CLI `scripts/ingest_jsonl.py` (adds repo root to PYTHONPATH), requirements at `backend/ingest/requirements.txt`, README ingestion section. Pipeline scrubs null bytes, deterministic DFS ordering, content/summary truncation (32k/4k), role filter user/assistant, skips empty content_text, raw + stats persisted. Codebase map updated.
 - T-010 done: embedding pipeline added (`backend/embeddings/pipeline.py`, `backend/embeddings/requirements.txt`, `scripts/embed_messages.py`) using student portal embeddings (provider `supermind`, model `text-embedding-3-large`). Includes SHA256 content_hash skip, summary preference, truncation guard (32k), batching/retries, upsert into `message_embeddings`. README updated with embedding instructions.
@@ -8,6 +9,7 @@
 - T-007 done on branch `feature/T-007-chat-agent`: orchestrator rewired to LLM tool-calls with legacy system prompt; OpenAI base `https://api.openai.com/v1/` and model `gpt-5.1` for orchestration; `/chat` now has documented request body; added `scripts/orchestrator_smoke.py` non-stream smoke; metadata includes cited_turn_ids + histogram.
 
 ## Last verified
+- 2025-12-25 05:10 EST: `.venv/bin/python -m compileall backend` (pass). Manual model smoke: create session + append turn via `backend.models.sessions` (session_id `cd9e2457-1e05-4900-9765-6fbd74eac33d`, conversation_id `d5cc200c-7dca-4fbd-a719-99933282fe42`, message_count=2, idx [0,1]). `list_sessions` shows session_count=1, archived=False, pinned=False. Patched/pinned same session then soft-archived; archived session hidden from default list, visible with `include_archived=True`.
 - 2025-12-25: Dropped tables, reapplied `migrations/0001_init.sql`, reran ingest on `data/chatgpt_dump/2025-12-23/conversations.jsonl` via `POSTGRES_PORT=5433 .venv/bin/python scripts/ingest_jsonl.py data/chatgpt_dump/2025-12-23/conversations.jsonl` → succeeded with stats `{'conversations_written': 2059, 'conversations_skipped': 0, 'messages_written': 27538, 'messages_role_skipped': 15020, 'messages_content_empty_skipped': 12827, 'messages_truncated': 25, 'turn_summary_truncated': 0, 'lines_processed': 2059}`.
 - `docker compose exec -T db psql -U lens -d lens -c "\\dt"` shows expected tables. `select status, stats from ingest_runs order by started_at desc limit 1` -> latest row `status=succeeded` with stats above.
 - Spot-check: `select id, conversation_id, idx_in_conv, role, create_time from messages order by create_time asc limit 5` shows sequential idx_in_conv and timestamptz.
@@ -17,7 +19,7 @@
 
 ## Next steps (1–3)
 - Keep `.env` sourced for embedding- and chat-dependent commands; `SUPER_MIND_API_KEY` and `OPENAI_API_KEY` required.
-- Optional: run uvicorn for streaming `/chat` smoke (`.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000`) and POST OpenAI-style payload; expect streamed tokens and metadata chunk (cited_turn_ids + histogram).
+- Optional: run uvicorn for streaming `/chat` smoke (`.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000`) and POST OpenAI-style payload; expect streamed tokens, metadata chunk (cited_turn_ids + histogram + session/message ids), and session persistence.
 - Retrieval endpoints remain available for troubleshooting; pgweb available on PGWEB_PORT (default 8081) via `docker compose up -d db pgweb`.
 
 ## Risks / unknowns
@@ -25,5 +27,6 @@
 - Ingest stats show 25 content truncations; null bytes are scrubbed from raw payloads before storage; empty content messages are skipped and counted.
 - Embedding pipeline depends on student portal availability and `SUPER_MIND_API_KEY`; retries are basic exponential, no circuit breaker.
 - Chat streaming path not yet exercised against live portal; metadata chunk injection assumes OpenAI-compatible event parsing.
+- Session persistence path lightly exercised; frontend should avoid sending drafts to prevent duplicate storage; ordering relies on sequential inserts (no locking yet).
 
 
