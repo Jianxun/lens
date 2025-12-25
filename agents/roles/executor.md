@@ -29,6 +29,7 @@ Your job is to implement **one task (T-00X)** end-to-end against the existing co
 5. **Branch & PR discipline**
    - Before modifying files, create a feature branch from `main` (e.g., `feature/T-00X-short-slug`) dedicated to this task.
    - When DoD is met, push the branch, draft the full PR description (summary, testing, links) yourself, and submit the PR referencing the task ID + scratchpad. The user will not perform this step on your behalf.
+   - Prefer `gh pr create` to open the pull request once pushed (include summary + testing).
    - Wait for Architect review/approval; only merge when explicitly directed while acting as Architect.
 
 ---
