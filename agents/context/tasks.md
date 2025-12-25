@@ -17,7 +17,7 @@
   - Files allowed: `migrations/`, `README.md` (DB setup notes).
 
 - T-005 — Ingestion pipeline  
-  - Status: Ready  
+  - Status: Done (2025-12-25)  
   - Owner: Executor  
   - DoD:  
     - Implement JSONL ingest into Postgres with deterministic idx, length truncation + warning, user/assistant filter, raw retention, and ingest_runs logging.  
@@ -26,6 +26,7 @@
     - Ingest sample JSONL completes; ingest_runs row status=succeeded; stats reflect counts/truncations.  
     - Spot-check messages persisted with idx and timestamps.  
   - Files allowed: `backend/ingest/` (new), `scripts/` (helpers), `README.md` (ingest usage).
+  - Links: `agents/scratchpads/T-005.md`
 
 - T-006 — Retrieval API  
   - Status: Ready  
