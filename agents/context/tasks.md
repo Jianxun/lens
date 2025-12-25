@@ -5,7 +5,7 @@
 
 ## Current Sprint
 - T-004 — Database schema & migrations  
-  - Status: Ready  
+  - Status: In Progress  
   - Owner: Executor  
   - DoD:  
     - Create Postgres schema: conversations, messages, message_embeddings (UUID PK), sessions, session_messages, ingest_runs.  
