@@ -5,7 +5,7 @@
 
 ## Current Sprint
 - T-011 — Embedding pipeline stall beyond 3k rows  
-  - Status: Ready  
+  - Status: Done (2025-12-26)  
   - Owner: Executor  
   - DoD:  
     - Reproduce the stall around 3k embeddings; capture batch offsets, DB row counts, and API responses to isolate the failure mode.  
@@ -15,7 +15,8 @@
     - `. .venv/bin/activate && set -a && source .env && set +a && POSTGRES_PORT=5432 python scripts/embed_messages.py --batch-size 8 --limit 6000 --force` completes without halt and reports embeddings > 6000.  
     - `docker compose exec -T db psql -U lens -d lens -c "select count(*) from message_embeddings where provider='supermind' and model='text-embedding-3-large';"` shows the expected row growth beyond prior 3k ceiling.  
   - Files allowed: `backend/embeddings/pipeline.py`, `scripts/embed_messages.py`, `backend/main.py` (env wiring).  
-  - Links: TBD  
+  - Links: agents/scratchpads/T-011.md  
+  - PR: https://github.com/Jianxun/lens/pull/8  
 
 - T-012 — Orchestrator tool trace UX (histogram + peek query strings)  
   - Status: Ready  
@@ -166,5 +167,3 @@
   - Verify:  
     - `ls agents/context`  
   - Links: `agents/context/contract.md`, `agents/context/handoff.md`
-
-
