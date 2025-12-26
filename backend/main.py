@@ -8,9 +8,13 @@ from typing import Optional
 from fastapi import FastAPI
 
 from backend.api import chat, retrieval, sessions
+from backend.config import load_dotenv_file
 
 EMBEDDING_BASE_URL = "https://space.ai-builders.com/backend/v1"
 EMBEDDING_API_KEY_ENV = "SUPER_MIND_API_KEY"
+
+
+load_dotenv_file()
 
 
 def dsn_from_env() -> str:
@@ -53,4 +57,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-

@@ -35,5 +35,5 @@
 - 2025-12-25 (ADR-0005): Defined agent orchestration and streaming `/chat` API; orchestrator LLM `gpt-5`; fixed embedding model; multi-pass peek/turn tool usage with temporal zooming and capped hydration.
 - 2025-12-25 (ADR-0006): Defined sessions model/API (sessions list, history, soft archive/pin, linking messages to sessions).
 - 2025-12-25 (ADR-0007): Defined frontend UX (ChatGPT-like layout, markdown assistant bubbles, session list, streaming chat, full-history default).
-
+- 2025-12-26 (ADR-0008): Secrets policy — env vars are the single source of truth; backend auto-loads repo `.env` for local dev but production/CI must inject their own env vars.
 
