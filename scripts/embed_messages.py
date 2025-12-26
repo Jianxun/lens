@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from backend.config import load_dotenv_file  # noqa: E402
 from backend.embeddings.pipeline import EmbeddingConfig, run_embedding_job  # noqa: E402
 
 
@@ -83,6 +84,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    load_dotenv_file()
     args = parse_args()
     cfg = EmbeddingConfig(
         dsn=args.dsn,
@@ -114,5 +116,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
 

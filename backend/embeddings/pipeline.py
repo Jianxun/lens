@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import sys
 import time
 from dataclasses import dataclass
 from typing import Any, List, Optional, Sequence, Tuple
@@ -51,6 +52,19 @@ class EmbeddingConfig:
     max_retries: int = 3
     retry_backoff_seconds: float = 2.0
     force: bool = False
+
+
+class EmbeddingFetchError(RuntimeError):
+    def __init__(
+        self,
+        message: str,
+        *,
+        status: Optional[int] = None,
+        body: Optional[str] = None,
+    ) -> None:
+        super().__init__(message)
+        self.status = status
+        self.body = body
 
 
 def fetch_candidates(
@@ -139,6 +153,8 @@ def fetch_embeddings(
     backoff: float,
 ) -> List[List[float]]:
     last_exc: Optional[Exception] = None
+    last_status: Optional[int] = None
+    last_body: Optional[str] = None
     for attempt in range(1, max_retries + 1):
         try:
             resp = client.post(
@@ -155,11 +171,90 @@ def fetch_embeddings(
             return embeddings
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
+            last_status, last_body = _extract_response_details(exc)
             if attempt == max_retries:
                 break
             time.sleep(backoff * attempt)
-    raise RuntimeError(f"Failed to fetch embeddings after {max_retries} attempts") from last_exc
+    _log_retry_failure(model, max_retries, len(texts), last_exc, last_status, last_body)
+    raise EmbeddingFetchError(
+        f"Failed to fetch embeddings after {max_retries} attempts",
+        status=last_status,
+        body=last_body,
+    ) from last_exc
 
+
+def _extract_response_details(exc: Exception) -> Tuple[Optional[int], Optional[str]]:
+    response = None
+    if isinstance(exc, httpx.HTTPStatusError):
+        response = exc.response
+    elif isinstance(exc, httpx.HTTPError):
+        response = exc.response
+    if response is None:
+        return None, None
+    try:
+        body = response.text
+    except Exception:  # noqa: BLE001
+        body = "<unable to read response text>"
+    body = (body or "").strip().replace("\n", " ")
+    max_len = 500
+    if len(body) > max_len:
+        body = f"{body[:max_len]}...(truncated)"
+    return response.status_code, body
+
+
+def _log_retry_failure(
+    model: str,
+    attempts: int,
+    text_count: int,
+    exc: Optional[Exception],
+    status: Optional[int],
+    body: Optional[str],
+) -> None:
+    if exc is None:
+        return
+    parts = [
+        "[embeddings] retries_exhausted",
+        f"model={model}",
+        f"attempts={attempts}",
+        f"text_count={text_count}",
+        f"error_type={type(exc).__name__}",
+    ]
+    if status is not None:
+        parts.append(f"status={status}")
+    if body:
+        parts.append(f"response_snippet={body}")
+    parts.append(f"error={exc}")
+    print(" ".join(parts), file=sys.stderr)
+
+
+def _is_context_length_error(exc: EmbeddingFetchError) -> bool:
+    if exc.status != 400:
+        return False
+    if not exc.body:
+        return False
+    lowered = exc.body.lower()
+    return "maximum context length" in lowered or "requested" in lowered and "tokens" in lowered
+
+
+def _log_context_skip(
+    user_ids: Sequence[Any],
+    assistant_ids: Sequence[Any],
+    content_hashes: Sequence[str],
+    exc: EmbeddingFetchError,
+) -> None:
+    def _join(values: Sequence[Any]) -> str:
+        head = [str(v) for v in values[:5]]
+        return ",".join(head) + ("..." if len(values) > 5 else "")
+
+    snippet = (exc.body or "").replace("\n", " ")
+    if len(snippet) > 300:
+        snippet = f"{snippet[:300]}...(truncated)"
+    print(
+        "[embeddings] batch_skipped reason=context_length "
+        f"user_ids={_join(user_ids)} assistant_ids={_join(assistant_ids)} "
+        f"hashes={_join(content_hashes)} status={exc.status} response_snippet={snippet}",
+        file=sys.stderr,
+    )
 
 def to_vector_literal(values: Sequence[float]) -> str:
     return "[" + ",".join(f"{v:.8f}" for v in values) + "]"
@@ -278,13 +373,20 @@ def run_embedding_job(
                 processed += len(candidates)
                 continue
 
-            embeddings = fetch_embeddings(
-                client,
-                cfg.model,
-                contents,
-                cfg.max_retries,
-                cfg.retry_backoff_seconds,
-            )
+            try:
+                embeddings = fetch_embeddings(
+                    client,
+                    cfg.model,
+                    contents,
+                    cfg.max_retries,
+                    cfg.retry_backoff_seconds,
+                )
+            except EmbeddingFetchError as exc:
+                if _is_context_length_error(exc):
+                    _log_context_skip(user_ids, assistant_ids, hashes, exc)
+                    processed += len(candidates)
+                    continue
+                raise
             upserted = upsert_embeddings(
                 conn,
                 cfg.provider,
@@ -307,5 +409,3 @@ def run_embedding_job(
                 f"processed={processed}"
             )
     return stats
-
-

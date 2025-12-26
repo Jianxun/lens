@@ -1,6 +1,7 @@
 # Handoff
 
 ## Current state
+- T-011 completed on `feature/T-011-embedding-pipeline-fix`: embedding CLI auto-loads `.env` via `backend.config.load_dotenv_file()`, retry exhaustion logs include status/body, and HTTP 400 “maximum context length” batches now log their user/assistant IDs + hashes before being skipped so jobs proceed past the former ~3k ceiling.
 - T-008 on branch `feature/T-008-sessions-api` (PR #6): added session helpers (`backend/models/sessions.py`), new `/sessions` router, wired into `backend/main.py`, chat now accepts `session_id` and persists finalized user/assistant turns into `messages` and `session_messages` (metadata returns session/message ids).
 - T-004 done: initial Postgres schema added (`migrations/0001_init.sql`), docker-compose for local Postgres + pgvector, README with setup/verify steps, pgweb UI, codebase_map updated. DB running on port 5432 (docker compose).
 - T-005 done: ingestion pipeline implemented (`backend/ingest/pipeline.py`, `backend/__init__.py`), CLI `scripts/ingest_jsonl.py` (adds repo root to PYTHONPATH), requirements at `backend/ingest/requirements.txt`, README ingestion section. Pipeline scrubs null bytes, deterministic DFS ordering, content/summary truncation (32k/4k), role filter user/assistant, skips empty content_text, raw + stats persisted. Codebase map updated.
@@ -23,15 +24,16 @@
 - 2025-12-25: `cd frontend && npm run build` (pass post-backend fix).
 
 ## Next steps (1–3)
-- Prioritize T-011..T-014: reproduce embedding stall >3k, add orchestrator tool-call trace pipeline + collapsible histogram/peek panel, fix streaming UI updates, and tune system prompt (hydration cap + citation style).
+- Shift focus to T-012..T-014: orchestrator tool-call trace logging + frontend panel, streaming UI fixes, and system prompt tuning per tasks.md.
+- Keep `.env` sourced for embedding/orchestrator testing; Supermind + OpenAI keys must be present for smokes.
+- Backend/frontend smokes still recommended (uvicorn + `npm run dev`) once upcoming tasks land.
 - Keep `.env` sourced for embedding- and chat-dependent commands; `SUPER_MIND_API_KEY` and `OPENAI_API_KEY` required.
 - Backend/Frontend smoke: run uvicorn for `/chat` streaming and `cd frontend && npm run dev` to validate streaming fixes and new trace panel once implemented.
 
 ## Risks / unknowns
+- Git refuses writes under `.git/refs/heads/feature/*` even after `chflags nouchg`, blocking new branch creation until repo attributes are fixed.
 - No vector index for 3072-dim embeddings; retrieval perf will rely on seq scan unless model/dim change or alternative index is added.
 - Ingest stats show 25 content truncations; null bytes are scrubbed from raw payloads before storage; empty content messages are skipped and counted.
 - Embedding pipeline depends on student portal availability and `SUPER_MIND_API_KEY`; retries are basic exponential, no circuit breaker.
 - Chat streaming path not yet exercised against live portal; metadata chunk injection assumes OpenAI-compatible event parsing.
 - Session persistence path lightly exercised; frontend should avoid sending drafts to prevent duplicate storage; ordering relies on sequential inserts (no locking yet).
-
-
