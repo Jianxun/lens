@@ -16,6 +16,7 @@
     - `docker compose exec -T db psql -U lens -d lens -c "select count(*) from message_embeddings where provider='supermind' and model='text-embedding-3-large';"` shows the expected row growth beyond prior 3k ceiling.  
   - Files allowed: `backend/embeddings/pipeline.py`, `scripts/embed_messages.py`, `backend/main.py` (env wiring).  
   - Links: agents/scratchpads/T-011.md  
+  - PR: https://github.com/Jianxun/lens/pull/8  
 
 - T-012 — Orchestrator tool trace UX (histogram + peek query strings)  
   - Status: Ready  
