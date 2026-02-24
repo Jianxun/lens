@@ -19,7 +19,7 @@
   - PR: https://github.com/Jianxun/lens/pull/8  
 
 - T-012 — Orchestrator tool trace UX (histogram + peek query strings)  
-  - Status: Ready  
+  - Status: In Progress (2025-12-26)  
   - Owner: Executor  
   - DoD:  
     - Emit structured trace of every tool call (peek/turn) with inputs and timing; persist per-chat run for frontend consumption.  
@@ -29,7 +29,7 @@
     - `python scripts/orchestrator_smoke.py "test trace"` logs tool-call traces with queries and histogram payloads.  
     - `cd frontend && npm run dev` → manual chat shows collapsible right panel with histogram + peek query list; toggle hides/shows without shifting chat input.  
   - Files allowed: `backend/services/agent.py`, `backend/api/chat.py`, `frontend/src/App.tsx`, `frontend/src/components/*`, `frontend/src/api.ts`.  
-  - Links: TBD  
+  - Links: agents/scratchpads/T-012.md  
 
 - T-013 — Streaming UI not updating during SSE  
   - Status: Ready  

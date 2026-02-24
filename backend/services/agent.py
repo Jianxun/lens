@@ -58,7 +58,7 @@ Lineage discipline (NEW):
 - Preserve uncertainty, disagreement, reversals, and abandoned paths.
 - Avoid hindsight smoothing or narrative inevitability.
 
-Concept tracking (NEW):
+Concept tracking:
 - Identify recurring concepts and note:
   * first appearance
   * refinement or re-framing points
@@ -76,10 +76,12 @@ Final answer requirements:
 - Maintain a list of cited turns in academic citation form ([1] [2] [3] ...).
 - Append the citation list to the end of the answer.
 
-Remember:
-You are producing an auditable cognitive trace, not a polished retrospective summary.
 
 """
+
+#Remember:
+#You are producing an auditable cognitive trace, not a polished retrospective summary.
+
 
 PEEK_TOOL_DEF = {
     "type": "function",
